@@ -1,3 +1,5 @@
+import base64
+import io
 import os
 
 import folium
@@ -74,9 +76,14 @@ def style_axis(ax, grid_axis):
 
 
 def show(fig):
+    # Grafik ditanam langsung sebagai data URI, bukan lewat st.pyplot, karena di Streamlit Cloud
+    # file gambar st.pyplot bisa gagal diambil browser sehingga grafik tampil sebagai gambar rusak.
     plt.tight_layout()
-    st.pyplot(fig)
+    buffer = io.BytesIO()
+    fig.savefig(buffer, format="png", dpi=150, bbox_inches="tight", facecolor="white")
     plt.close(fig)
+    encoded = base64.b64encode(buffer.getvalue()).decode("ascii")
+    st.image(f"data:image/png;base64,{encoded}", width="stretch")
 
 
 # ---------------------------------------------------------------- data helpers
